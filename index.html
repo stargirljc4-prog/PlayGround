@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#101a37">
+<link rel="icon" href="data:,">
+<title>Side by Side — Co-op Parkour</title>
+<style>
+:root{color-scheme:dark;--ink:#f7f5ff;--muted:#a9b5d5;--pink:#ff6ba8;--cyan:#62e8dd;--gold:#ffda78}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#101a37;font-family:Inter,ui-rounded,"Trebuchet MS",system-ui,sans-serif;color:var(--ink)}
+body{display:grid;place-items:center;background:radial-gradient(ellipse at 50% 110%,#293968 0,transparent 58%),#101a37}
+#game-shell{position:relative;width:min(100vw,160vh);height:min(100vh,62.5vw);min-height:320px;overflow:hidden;border:1px solid #ffffff20;border-radius:20px;background:#172446;box-shadow:0 28px 90px #070d2080;isolation:isolate}
+canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.topbar{position:absolute;inset:18px 22px auto;display:flex;align-items:flex-start;justify-content:space-between;z-index:2;pointer-events:none;gap:12px}
+.brand{display:flex;align-items:center;gap:10px;font-size:12px;line-height:1.15;font-weight:900;letter-spacing:.14em;text-transform:uppercase;text-shadow:0 2px 8px #111a40}.brand-mark{width:32px;height:32px;border-radius:11px;background:linear-gradient(145deg,#76f3e5,#42b3c5);display:grid;place-items:center;color:#10243a;font-size:18px;box-shadow:0 5px 18px #3ad9d766}.brand small{display:block;color:#9eb0d7;font-size:9px;letter-spacing:.2em;margin-top:3px}
+.hud{display:flex;gap:8px;align-items:center}.pill{height:36px;padding:0 13px;border:1px solid #ffffff24;background:#101a3caa;backdrop-filter:blur(12px);border-radius:12px;display:flex;align-items:center;gap:8px;font-size:11px;font-weight:800;letter-spacing:.08em;color:#d9e3ff;box-shadow:0 6px 20px #0a112830}.pill b{color:#fff}.progress-wrap{position:absolute;left:50%;top:65px;transform:translateX(-50%);width:min(310px,38%);z-index:2;text-align:center;pointer-events:none}.progress-caption{display:flex;justify-content:space-between;color:#c3cee9;font-size:9px;font-weight:900;letter-spacing:.16em;text-transform:uppercase;margin-bottom:7px}.progress-track{height:6px;border-radius:9px;background:#ffffff25;overflow:hidden}.progress-fill{height:100%;width:4%;border-radius:9px;background:linear-gradient(90deg,#61e9d8,#b2ffdd);box-shadow:0 0 15px #65f8d9;transition:width .12s}
+.toast{position:absolute;z-index:3;top:104px;left:50%;transform:translate(-50%,-8px);padding:10px 15px;border:1px solid #ffffff28;border-radius:12px;background:#0d1838dc;box-shadow:0 8px 26px #070d2066;color:#e8f4ff;font-size:12px;font-weight:800;white-space:nowrap;opacity:0;transition:.24s;pointer-events:none}.toast.show{opacity:1;transform:translate(-50%,0)}
+.overlay{position:absolute;inset:0;z-index:5;display:grid;place-items:center;padding:22px;background:linear-gradient(180deg,#0d173b8c,#101936b8);backdrop-filter:blur(8px);transition:opacity .25s}.overlay.hidden{opacity:0;pointer-events:none}.card{width:min(470px,100%);padding:32px;border:1px solid #ffffff2a;border-radius:24px;background:linear-gradient(145deg,#1d2b52f2,#111d3bf2);box-shadow:0 22px 70px #080f2b88;text-align:center}.eyebrow{font-size:10px;font-weight:900;letter-spacing:.23em;text-transform:uppercase;color:var(--cyan)}h1{font-size:clamp(35px,6vw,58px);letter-spacing:-.06em;line-height:.95;margin:13px 0 14px}.card p{color:#b8c5e1;font-size:14px;line-height:1.65;margin:0 auto 20px;max-width:370px}.buddy-badge{display:flex;justify-content:center;align-items:center;gap:10px;margin:17px auto 23px;color:#dbe5ff;font-size:11px;font-weight:800}.avatar{display:inline-grid;place-items:center;width:34px;height:34px;border-radius:11px;background:#ff74aa;color:#351630;box-shadow:0 5px 16px #fc71ad44;font-size:17px}.avatar.ai{background:#67e7d8;color:#12333d;box-shadow:0 5px 16px #67e7d844}.cta{border:0;border-radius:14px;padding:15px 26px;background:linear-gradient(100deg,#74f0de,#a7f2c5);color:#11283a;font-family:inherit;font-size:13px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;box-shadow:0 8px 24px #56e6ce44;transition:transform .15s,filter .15s}.cta:hover{transform:translateY(-2px);filter:brightness(1.07)}.cta:active{transform:translateY(1px)}.key-hint{margin-top:17px!important;font-size:10px!important;color:#8291b4!important;letter-spacing:.04em}.mobile-controls{display:none;position:absolute;z-index:3;inset:auto 16px 15px;justify-content:space-between;align-items:flex-end;pointer-events:none}.control-cluster{display:flex;gap:10px;pointer-events:auto}.touch-btn{width:58px;height:58px;border:1px solid #ffffff35;border-radius:20px;background:#112044a8;color:#e9f3ff;font-size:24px;font-weight:900;backdrop-filter:blur(10px);box-shadow:0 5px 18px #08102c55;touch-action:none;user-select:none}.touch-btn.jump{width:78px;height:78px;border-radius:26px;background:#5de3d5d9;color:#112d3a;font-size:11px;letter-spacing:.1em}.touch-btn:active,.touch-btn.down{transform:scale(.94);background:#ffffff48}
+@media(max-width:700px){#game-shell{width:100vw;height:100dvh;min-height:0;border:0;border-radius:0}.topbar{inset:12px 12px auto}.brand{font-size:10px}.brand-mark{width:29px;height:29px}.pill{height:32px;padding:0 9px;font-size:9px}.progress-wrap{top:57px;width:42%}.toast{top:88px;font-size:10px}.mobile-controls{display:flex}.card{padding:27px 22px}.card p{font-size:13px}.key-hint{margin-top:12px!important}}
+@media(max-height:440px) and (min-width:701px){.topbar{top:10px}.progress-wrap{top:51px}.card{padding:20px}.card p{margin-bottom:10px}.buddy-badge{margin:10px auto}}
+</style>
+</head>
+<body>
+<main id="game-shell" aria-label="Side by Side parkour game">
+<canvas id="game" aria-label="Platform game. Use arrows to move and space to jump."></canvas>
+<div class="topbar"><div class="brand"><div class="brand-mark">↗</div><div>SKYBOUND<small>PARTNER PARKOUR</small></div></div><div class="hud"><div class="pill">✦ <b id="buddy-status">BUDDY NEARBY</b></div><div class="pill">⏱ <b id="timer">00:00</b></div></div></div>
+<div class="progress-wrap"><div class="progress-caption"><span>Course progress</span><span id="progress-label">0%</span></div><div class="progress-track"><div class="progress-fill" id="progress"></div></div></div>
+<div class="toast" id="toast"></div>
+<div class="mobile-controls" aria-label="Touch controls"><div class="control-cluster"><button class="touch-btn" data-key="left" aria-label="Move left">←</button><button class="touch-btn" data-key="right" aria-label="Move right">→</button></div><button class="touch-btn jump" data-key="jump" aria-label="Jump">JUMP</button></div>
+<section class="overlay" id="overlay"><div class="card"><div class="eyebrow">A two-person kind of finish</div><h1>Side<br>by Side</h1><p>Leap across a sky-high obstacle course with your AI buddy. The finish gate only opens when <strong>you both</strong> make it.</p><div class="buddy-badge"><span class="avatar">●</span><span>YOU</span><span style="color:#7182a8">+</span><span class="avatar ai">✦</span><span>YOUR AI PARTNER</span></div><button class="cta" id="start">Run the course&nbsp; →</button><p class="key-hint">MOVE: A / D OR ← / → &nbsp; · &nbsp; JUMP: SPACE / W / ↑</p></div></section>
+</main>
+<script>
+(() => {
+const canvas=document.getElementById('game'),ctx=canvas.getContext('2d'),shell=document.getElementById('game-shell');
+const ui={overlay:document.getElementById('overlay'),start:document.getElementById('start'),timer:document.getElementById('timer'),progress:document.getElementById('progress'),progressLabel:document.getElementById('progress-label'),status:document.getElementById('buddy-status'),toast:document.getElementById('toast')};
+const WORLD=3060,FINISH=2860,GROUND=430;
+const platforms=[
+ {x:0,y:430,w:430},{x:510,y:380,w:260},{x:840,y:430,w:225},{x:1135,y:350,w:260},
+ {x:1465,y:410,w:280},{x:1815,y:340,w:275},{x:2160,y:410,w:255},{x:2485,y:375,w:465}
+];
+const spikes=[{x:920,w:68},{x:1250,w:54},{x:1575,w:68},{x:1935,w:60},{x:2260,w:58},{x:2600,w:60}];
+const checkpoints=[{x:1165,y:350,label:'CHECKPOINT 01'},{x:2190,y:410,label:'CHECKPOINT 02'}];
+let W=960,H=540,dpr=1,camera=0,last=0,elapsed=0,started=false,won=false,toastTimer=0,checkpoint=0,particles=[],decor=[];
+const keys={left:false,right:false,jump:false},pressed={jump:false};
+const player={x:90,y:430,vx:0,vy:0,w:27,h:43,grounded:true,coyote:0,jumpBuffer:0,face:1,land:0};
+const buddy={x:38,y:430,vx:0,vy:0,w:26,h:42,grounded:true,coyote:0,face:1,land:0};
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+function resize(){const r=shell.getBoundingClientRect();H=540;W=r.width*540/r.height;dpr=Math.min(devicePixelRatio||1,2);canvas.width=Math.round(r.width*dpr);canvas.height=Math.round(r.height*dpr);ctx.setTransform(dpr*r.width/W,0,0,dpr*r.height/H,0,0);}
+window.addEventListener('resize',resize);resize();
+function say(text){ui.toast.textContent=text;ui.toast.classList.add('show');toastTimer=2.1}
+function startGame(){ui.overlay.classList.add('hidden');started=true;elapsed=0;last=performance.now();requestAnimationFrame(frame)}
+ui.start.addEventListener('click',startGame);
+function jump(c){if(c.jumpBuffer>0&&(c.grounded||c.coyote>0)){c.vy=-12.1;c.grounded=false;c.coyote=0;c.jumpBuffer=0;c.land=0;for(let i=0;i<5;i++)particles.push({x:c.x+c.w/2,y:c.y+c.h,vx:(Math.random()-.5)*2,vy:Math.random()*-2,life:.45,color:c===player?'#75f3df':'#ff82b4'})}}
+function surfaceAt(x,y){let best=null;for(const p of platforms)if(x>p.x-5&&x<p.x+p.w+5&&y<=p.y+10&&y>=p.y-90&&(!best||p.y<best.y))best=p;return best}
+function collide(c,oldY){c.grounded=false;let surf=null;for(const p of platforms){if(c.x+c.w>p.x&&c.x<p.x+p.w&&oldY+c.h<=p.y+4&&c.y+c.h>=p.y&&c.vy>=0&&(!surf||p.y<surf.y))surf=p}if(surf){c.y=surf.y-c.h;c.vy=0;c.grounded=true;c.coyote=.11}else{c.coyote=Math.max(0,c.coyote-1/60)}if(!c.grounded&&c.y>H+120){if(c===player)respawn();else{c.x=Math.max(checkpoint?checkpoints[checkpoint-1].x:40,player.x-190);const p=platforms.find(p=>c.x+10>=p.x&&c.x+10<=p.x+p.w);c.y=(p?p.y:430)-c.h;c.vy=0;c.grounded=true;say('Your buddy took a shortcut back!')}}}
+function respawn(){const cp=checkpoints[checkpoint-1];player.x=cp?cp.x:60;player.y=(cp?cp.y:430)-player.h;player.vx=player.vy=0;player.grounded=true;buddy.x=Math.min(player.x-55,player.x);buddy.y=player.y+1;buddy.vx=buddy.vy=0;buddy.grounded=true;say(cp?'Back at the checkpoint!':'Whoops! Try that leap again.')}
+function updateCharacter(c,dt,isBuddy=false){let oldY=c.y;const run=4.05;let direction=0;if(isBuddy){const target=player.x-(player.x>FINISH-160?12:76);const diff=target-c.x;direction=Math.abs(diff)>14?Math.sign(diff):0;let speed=clamp(3.2+Math.max(0,player.x-c.x-160)*.012,3.2,5.1);c.vx=direction*speed;if(direction)c.face=direction;const here=surfaceAt(c.x+c.w*.5,c.y+c.h+4);const ahead=surfaceAt(c.x+c.w*.5+direction*48,c.y+c.h+3);const gapAhead=!ahead&&here&&direction>0;if((gapAhead&&player.x>c.x+50)||(c.grounded&&Math.abs(diff)>215&&ahead&&ahead.y<c.y+c.h+80))c.jumpBuffer=.12;
+ }else{direction=(keys.right?1:0)-(keys.left?1:0);c.vx=direction*run;if(direction)c.face=direction;if(pressed.jump)c.jumpBuffer=.14}
+ c.x=clamp(c.x+c.vx,0,WORLD-c.w);c.jumpBuffer=Math.max(0,c.jumpBuffer-dt);if(c.coyote>0)c.coyote=Math.max(0,c.coyote-dt);jump(c);c.vy=Math.min(c.vy+31*dt,15);c.y+=c.vy;collide(c,oldY);if(c.grounded)c.land=Math.min(1,c.land+dt*6);else c.land=Math.max(0,c.land-dt*4);
+ const foot=c.x+c.w/2;for(const s of spikes){if(foot>s.x&&foot<s.x+s.w&&c.y+c.h>surfaceYAt(foot)-5&&c.y+c.h<surfaceYAt(foot)+9){if(!isBuddy){respawn()}else{c.x=Math.max(0,player.x-110);c.y=(surfaceAt(c.x+10,600)?.y||430)-c.h;c.vy=0;c.grounded=true;say('Buddy bounced back to you!')}break}}
+}
+function surfaceYAt(x){let p=platforms.find(p=>x>=p.x&&x<=p.x+p.w);return p?p.y:999}
+function frame(now){if(!started)return;const dt=Math.min(.034,(now-last)/1000||.016);last=now;if(!won){elapsed+=dt;updateCharacter(player,dt);updateCharacter(buddy,dt,true);for(const cp of checkpoints)if(player.x>cp.x&&!cp.reached){cp.reached=true;checkpoint++;say('Checkpoint saved — '+cp.label)}if(player.x>FINISH-120&&buddy.x<FINISH-140&&Math.abs(player.x-buddy.x)>200)say('Wait for your buddy at the finish gate!');if(player.x+player.w>=FINISH){if(buddy.x+buddy.w>=FINISH-25){won=true;ui.overlay.innerHTML='<div class="card"><div class="eyebrow">Together, you made it</div><h1>Finish<br>together!</h1><p>You crossed every gap, and your AI buddy made it too. That’s what partners are for.</p><div class="buddy-badge"><span class="avatar">●</span><span>YOU</span><span style="color:#7182a8">+</span><span class="avatar ai">✦</span><span>YOUR AI PARTNER</span></div><button class="cta" id="again">Run it again&nbsp; ↻</button></div>';ui.overlay.classList.remove('hidden');document.getElementById('again').onclick=resetGame}else{player.x=FINISH-player.w-8;player.vx=0;say('Gate locked! Your partner has to arrive first.')}}}
+ camera+=(clamp(player.x-W*.36,0,WORLD-W)-camera)*Math.min(1,dt*5);if(W>WORLD)camera=0;draw();ui.progress.style.width=`${clamp(player.x/(FINISH)*100,0,100)}%`;ui.progressLabel.textContent=`${Math.round(clamp(player.x/FINISH*100,0,100))}%`;ui.timer.textContent=`${String(Math.floor(elapsed/60)).padStart(2,'0')}:${String(Math.floor(elapsed%60)).padStart(2,'0')}`;ui.status.textContent=buddy.x>FINISH-100?'AT THE GATE':player.x-buddy.x<190?'BUDDY NEARBY':'CATCHING UP';if(toastTimer>0){toastTimer-=dt;if(toastTimer<=0)ui.toast.classList.remove('show')}pressed.jump=false;requestAnimationFrame(frame)}
+function resetGame(){player.x=90;player.y=430-player.h;player.vx=player.vy=0;player.grounded=true;buddy.x=38;buddy.y=430-buddy.h;buddy.vx=buddy.vy=0;buddy.grounded=true;checkpoint=0;checkpoints.forEach(c=>c.reached=false);won=false;elapsed=0;started=true;ui.overlay.classList.add('hidden');last=performance.now();requestAnimationFrame(frame)}
+function draw(){
+ ctx.clearRect(0,0,W,H);const sky=ctx.createLinearGradient(0,0,0,H);sky.addColorStop(0,'#1b2b58');sky.addColorStop(.58,'#314879');sky.addColorStop(1,'#ed9a9d');ctx.fillStyle=sky;ctx.fillRect(0,0,W,H);
+ // soft sunset and distant floating peaks
+ const sunX=W*.77-camera*.08;ctx.fillStyle='#ffdc9b';ctx.globalAlpha=.72;ctx.beginPath();ctx.arc(sunX,H*.39,Math.min(W,H)*.105,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;
+ for(let layer=0;layer<3;layer++){const base=H*(.63+layer*.09),off=(camera*(.08+layer*.06))%260;ctx.fillStyle=['#354b79','#293e6c','#22355f'][layer];ctx.beginPath();ctx.moveTo(0,H);for(let x=-280-off;x<W+300;x+=260){let peak=base-(layer===0?62:layer===1?90:48);ctx.lineTo(x,base);ctx.lineTo(x+125,peak+Math.sin((x+off)*.018)*16);ctx.lineTo(x+260,base)}ctx.lineTo(W,H);ctx.closePath();ctx.fill()}
+ // tiny stars / distant windows
+ for(let i=0;i<38;i++){const x=((i*173-camera*.16)%(W+40)+W+40)%(W+40);const y=35+(i*71%(H*.42));ctx.globalAlpha=.24+(i%3)*.13;ctx.fillStyle=i%4?'#d8e6ff':'#ffe9b0';ctx.beginPath();ctx.arc(x,y,i%5===0?1.8:1,0,Math.PI*2);ctx.fill()}ctx.globalAlpha=1;
+ ctx.save();ctx.translate(-camera,0);
+ // route underglow and platforms
+ for(const p of platforms){const sy=worldY(p.y);ctx.fillStyle='#182951';ctx.fillRect(p.x,sy,p.w,H-sy+25);ctx.fillStyle='#5974a1';ctx.fillRect(p.x,sy,p.w,10);ctx.fillStyle='#80a0c6';ctx.fillRect(p.x,sy,p.w,3);for(let x=p.x+18;x<p.x+p.w-8;x+=38){ctx.fillStyle='#314875';ctx.fillRect(x,sy+23,16,3);}}
+ // little dashed route markers and ledges
+ for(const p of platforms){for(let x=p.x+28;x<p.x+p.w-25;x+=95){ctx.globalAlpha=.45;ctx.fillStyle='#b9daef';ctx.fillRect(x,worldY(p.y)-20,22,2)}ctx.globalAlpha=1}
+ for(const s of spikes){const sy=worldY(surfaceYAt(s.x));for(let x=s.x;x<s.x+s.w;x+=16){ctx.fillStyle='#ff648e';ctx.beginPath();ctx.moveTo(x,sy);ctx.lineTo(x+8,sy-19);ctx.lineTo(x+16,sy);ctx.closePath();ctx.fill();ctx.fillStyle='#ffadc0';ctx.fillRect(x+7,sy-15,2,8)}}
+ // checkpoints
+ for(let i=0;i<checkpoints.length;i++){const cp=checkpoints[i],x=cp.x;ctx.fillStyle='#18274c';ctx.fillRect(x,worldY(cp.y)-67,4,67);ctx.fillStyle=cp.reached?'#85ffcf':'#f6d476';ctx.beginPath();ctx.moveTo(x+4,worldY(cp.y)-66);ctx.lineTo(x+37,worldY(cp.y)-54);ctx.lineTo(x+4,worldY(cp.y)-42);ctx.closePath();ctx.fill();ctx.fillStyle='#e7eaff';ctx.font='800 9px system-ui';ctx.fillText('CP '+String(i+1).padStart(2,'0'),x-14,worldY(cp.y)+20)}
+ // finish gate and goal beacon
+ const gateY=worldY(375);ctx.fillStyle='#18274c';ctx.fillRect(FINISH,gateY-89,7,89);ctx.fillRect(FINISH+130,gateY-89,7,89);ctx.fillStyle='#ffda78';ctx.fillRect(FINISH,gateY-90,137,6);ctx.fillStyle='#fff0bb';ctx.font='900 13px system-ui';ctx.textAlign='center';ctx.fillText('FINISH',FINISH+68,gateY-101);ctx.textAlign='left';ctx.globalAlpha=.6;ctx.strokeStyle='#ffdc87';ctx.lineWidth=2;ctx.setLineDash([6,8]);ctx.strokeRect(FINISH+8,gateY-82,115,74);ctx.setLineDash([]);ctx.globalAlpha=1;
+ // clouds drift in parallax
+ for(let i=0;i<7;i++){const x=((i*390-camera*.25)%(WORLD+400)+WORLD+400)%(WORLD+400)-100;const y=105+(i*97%125);ctx.globalAlpha=.15;ctx.fillStyle='#fff';ctx.beginPath();ctx.ellipse(x,y,48,13,0,0,Math.PI*2);ctx.ellipse(x+25,y-7,30,17,0,0,Math.PI*2);ctx.ellipse(x+52,y,35,12,0,0,Math.PI*2);ctx.fill()}ctx.globalAlpha=1;
+ // characters
+ drawCharacter(buddy,'buddy');drawCharacter(player,'player');
+ ctx.restore();
+ // world marker hint
+ if(!won&&player.x>FINISH-200&&buddy.x<FINISH-130){ctx.fillStyle='#fff1c8';ctx.font='800 11px system-ui';ctx.textAlign='center';ctx.fillText('WAIT FOR YOUR PARTNER',W/2,H*.25);ctx.textAlign='left'}
+}
+function worldY(y){return H-(430-y)*(H/540)}
+function drawCharacter(c,type){const x=c.x,y=c.y+(c.grounded?c.land*1.5:0),isAI=type==='buddy',cx=x+c.w/2;ctx.fillStyle='#111b3c55';ctx.beginPath();ctx.ellipse(cx,worldY(y+c.h)+3,17-c.land*3,4,0,0,Math.PI*2);ctx.fill();ctx.save();ctx.translate(cx,worldY(y));ctx.scale(c.face||1,1);const bob=c.grounded?Math.sin(elapsed*13+(isAI?1:0))*1.2:0;
+ // feet and body
+ ctx.fillStyle=isAI?'#ff7bad':'#71f0df';ctx.beginPath();ctx.roundRect(-10,22+bob,8,17,4);ctx.roundRect(2,22+bob,8,17,4);ctx.fill();ctx.fillStyle='#17254a';ctx.beginPath();ctx.roundRect(-12,35+bob,12,5,2);ctx.roundRect(1,35+bob,12,5,2);ctx.fill();ctx.fillStyle=isAI?'#ff7bad':'#71f0df';ctx.beginPath();ctx.roundRect(-13,2+bob,26,25,9);ctx.fill();ctx.fillStyle=isAI?'#ffc1d9':'#c2fff1';ctx.beginPath();ctx.arc(0,-7+bob,12,0,Math.PI*2);ctx.fill();ctx.fillStyle='#1b2a4d';ctx.beginPath();ctx.arc(4,-8+bob,1.8,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(10,-8+bob,1.8,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(4.5,-8.5+bob,.65,0,Math.PI*2);ctx.arc(10.5,-8.5+bob,.65,0,Math.PI*2);ctx.fill();ctx.fillStyle=isAI?'#ff83b0':'#70eee0';ctx.beginPath();ctx.roundRect(-8,-22+bob,16,5,3);ctx.fill();
+ ctx.restore();ctx.fillStyle=isAI?'#ffc3dc':'#c0fff0';ctx.font='900 9px system-ui';ctx.textAlign='center';ctx.fillText(isAI?'NOVA':'YOU',cx,worldY(y)-29);ctx.textAlign='left'}
+function setKey(name,value){if(name==='jump'&&value&&!keys.jump)pressed.jump=true;keys[name]=value;document.querySelector(`.touch-btn[data-key="${name}"]`)?.classList.toggle('down',value)}
+window.addEventListener('keydown',e=>{const k=e.key.toLowerCase();if(['arrowleft','arrowright','arrowup',' ','w','a','d'].includes(k))e.preventDefault();if(k==='arrowleft'||k==='a')setKey('left',true);if(k==='arrowright'||k==='d')setKey('right',true);if(k===' '||k==='arrowup'||k==='w')setKey('jump',true);if(k==='enter'&&!started)startGame()});
+window.addEventListener('keyup',e=>{const k=e.key.toLowerCase();if(k==='arrowleft'||k==='a')setKey('left',false);if(k==='arrowright'||k==='d')setKey('right',false);if(k===' '||k==='arrowup'||k==='w')setKey('jump',false)});
+document.querySelectorAll('.touch-btn').forEach(btn=>{const name=btn.dataset.key;btn.addEventListener('pointerdown',e=>{e.preventDefault();btn.setPointerCapture(e.pointerId);setKey(name,true)});for(const ev of ['pointerup','pointercancel','lostpointercapture'])btn.addEventListener(ev,e=>{e.preventDefault();setKey(name,false)})});
+// Initial animated scene, before the run starts.
+function attract(){if(started)return;draw();requestAnimationFrame(attract)}requestAnimationFrame(attract);
+})();
+</script>
+</body>
+</html>
